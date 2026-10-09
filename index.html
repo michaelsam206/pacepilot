@@ -1,57 +1,128 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#e53945"><meta name="description" content="Live GPS running pace dial and map">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#e53945">
+<meta name="description" content="Live GPS running pace dial and map">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
 <title>PACEPILOT</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--bg:#b91f2c;--panel:#171d20;--ink:#fff;--muted:#b9c6c8;--green:#20df83;--red:#e53945}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;transition:background .2s;min-height:100vh}
-body.good{background:#087b4b}header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#101719dd;gap:10px}
-.brand{font-weight:950;letter-spacing:2px;font-size:21px}.brand span{color:var(--green)}#gps{font-size:12px;color:#d5e0df}
-main{max-width:780px;margin:auto;padding:12px}.panel{background:#111a1d;border:1px solid #ffffff26;border-radius:17px;padding:14px;margin-bottom:12px}
-label{display:block;font-size:13px;font-weight:750;margin:8px 0}input,select{background:#0b1214;color:#fff;border:1px solid #526063;border-radius:10px;padding:12px;width:100%;font:inherit}
-button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--green);color:#071b12}.danger{background:#e53945;color:white}.secondary{background:#293639;color:#fff;border:1px solid #526063}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#1b282b;border-radius:12px;padding:10px;min-width:0}.caption{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:800}.num{font-size:clamp(18px,5vw,27px);font-weight:900;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.muted{color:var(--muted);font-size:12px}
-#dialArea{text-align:center;border-radius:16px;padding:15px 10px;background:#b91f2c;transition:background .2s}#dialArea.good{background:#087b4b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;transition:background .2s;min-height:100vh}
+body.good{background:#087b4b}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#101719dd;gap:10px}
+.brand{font-weight:950;letter-spacing:2px;font-size:21px}
+.brand span{color:var(--green)}
+#gps{font-size:12px;color:#d5e0df}
+main{max-width:780px;margin:auto;padding:12px}
+.panel{background:#111a1d;border:1px solid #ffffff26;border-radius:17px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:13px;font-weight:750;margin:8px 0}
+input,select{background:#0b1214;color:#fff;border:1px solid #526063;border-radius:10px;padding:12px;width:100%;font:inherit}
+button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:800;cursor:pointer}
+.primary{background:var(--green);color:#071b12}
+.danger{background:#e53945;color:white}
+.secondary{background:#293639;color:#fff;border:1px solid #526063}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#1b282b;border-radius:12px;padding:10px;min-width:0}
+.caption{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:800}
+.num{font-size:clamp(18px,5vw,27px);font-weight:900;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.muted{color:var(--muted);font-size:12px}
+#dialArea{text-align:center;border-radius:16px;padding:15px 10px;background:#b91f2c;transition:background .2s}
+#dialArea.good{background:#087b4b}
 .targetrow{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:440px;margin:0 auto}
 .badge{border-radius:99px;padding:8px 11px;font-size:11px;font-weight:950;letter-spacing:1px;background:#e53945}
 .badge.good{background:var(--green);color:#071b12}
 .dial{width:min(78vw,340px);height:min(78vw,340px);margin:14px auto;border-radius:50%;position:relative;border:8px solid #f3f6f5;background:radial-gradient(circle,#142023 0 65%,#314044 66% 71%,#0c1517 72%);box-shadow:0 8px 30px #0004}
 .tick{position:absolute;width:2px;height:9px;background:#8ea1a2;left:calc(50% - 1px);top:7px;transform-origin:1px calc(min(78vw,340px)/2 - 15px)}
-.dialTop{position:absolute;top:7px;left:0;width:100%;display:flex;justify-content:center;font-size:11px;font-weight:900;letter-spacing:1px}.dialTop span{background:#293639;border:1px solid #f3f6f5;border-radius:7px;padding:5px 9px;color:#fff;box-shadow:0 2px 8px #0005}
+.dialTop{position:absolute;top:7px;left:0;width:100%;display:flex;justify-content:center;font-size:11px;font-weight:900;letter-spacing:1px}
+.dialTop span{background:#293639;border:1px solid #f3f6f5;border-radius:7px;padding:5px 9px;color:#fff;box-shadow:0 2px 8px #0005}
 .hand{position:absolute;left:calc(50% - 2px);top:50%;width:4px;height:39%;background:#fff;border-radius:5px;transform-origin:50% 0;z-index:2}
 .hand:before{content:"";position:absolute;top:-6px;left:-4px;width:12px;height:12px;border-radius:50%;background:#fff}
 .hub{position:absolute;top:calc(50% - 8px);left:calc(50% - 8px);width:16px;height:16px;border:3px solid #19272a;border-radius:50%;background:white;z-index:3}
-.reading{position:absolute;top:27%;width:100%;left:0}.reading .label{font-size:10px;letter-spacing:1.5px;color:#bdcccc;font-weight:800}.pace{font-size:clamp(37px,10vw,48px);font-weight:950;letter-spacing:-1px;font-variant-numeric:tabular-nums}.status{font-size:clamp(21px,5vw,28px);font-weight:950}.maphead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}#map{height:250px;border-radius:13px;overflow:hidden;background:#dce6df;color:#152521;z-index:1}#map.expanded{height:65vh;min-height:350px}.mapbuttons{display:flex;gap:8px;margin-top:9px}.mapbuttons button{flex:1;font-size:12px}.hidden{display:none!important}.leaflet-container{font:inherit}.arrowIcon{color:#1478ef;text-shadow:0 0 4px white;font-size:30px;line-height:30px;font-weight:900;text-align:center}
+.reading{position:absolute;top:27%;width:100%;left:0}
+.reading .label{font-size:10px;letter-spacing:1.5px;color:#bdcccc;font-weight:800}
+.pace{font-size:clamp(37px,10vw,48px);font-weight:950;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.status{font-size:clamp(21px,5vw,28px);font-weight:950}
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+#map{height:250px;border-radius:13px;overflow:hidden;background:#dce6df;color:#152521;z-index:1}
+#map.expanded{height:65vh;min-height:350px}
+.mapbuttons{display:flex;gap:8px;margin-top:9px}
+.mapbuttons button{flex:1;font-size:12px}
+.hidden{display:none!important}
+.leaflet-container{font:inherit}
+.arrowIcon{color:#1478ef;text-shadow:0 0 4px white;font-size:30px;line-height:30px;font-weight:900;text-align:center}
 @media(min-width:600px){main{padding:18px}.dial{width:340px;height:340px}.tick{transform-origin:1px 155px}}
-</style></head>
+</style>
+</head>
 <body>
-<header><div><div class="brand">PACE<span>PILOT</span></div><div class="muted">YOUR PACE. YOUR RUN.</div></div><div id="gps">● GPS waiting</div></header>
+<header>
+<div><div class="brand">PACE<span>PILOT</span></div><div class="muted">YOUR PACE. YOUR RUN.</div></div>
+<div id="gps">● GPS waiting</div>
+</header>
 <main>
 <section id="setup" class="panel">
-<h2 style="margin:0 0 5px">Set your target pace</h2><p class="muted">The screen stays RED until your current pace meets or beats your target.</p>
-<div class="grid"><div><label for="mins">Minutes</label><input id="mins" type="number" min="2" max="30" value="10"></div><div><label for="secs">Seconds</label><input id="secs" type="number" min="0" max="59" value="0" step="5"></div></div>
-<label for="units">Pace units</label><select id="units"><option value="mi">Minutes per mile</option><option value="km">Minutes per kilometer</option></select>
-<button id="allowLocationSetup" class="primary" style="width:100%;margin-top:13px">ALLOW LOCATION</button><button id="start" class="primary" style="width:100%;margin-top:13px">START RUN</button><p class="muted">Allow location access when prompted. Keep your phone secure and don't watch the screen while running.</p><div style="font-weight:850;margin-top:14px;margin-bottom:8px">LIVE MAP</div><div id="previewMap" style="height:240px;border-radius:13px;overflow:hidden;background:#dce6df"></div><p class="muted">Map stays visible before and during your run.</p>
+<h2 style="margin:0 0 5px">Set your target pace</h2>
+<p class="muted">The screen stays RED until your current pace meets or beats your target.</p>
+<div class="grid">
+<div><label for="mins">Minutes</label><input id="mins" type="number" min="2" max="30" value="10"></div>
+<div><label for="secs">Seconds</label><input id="secs" type="number" min="0" max="59" value="0" step="5"></div>
+</div>
+<label for="units">Pace units</label>
+<select id="units"><option value="mi">Minutes per mile</option><option value="km">Minutes per kilometer</option></select>
+<button id="allowLocationSetup" class="primary" style="width:100%;margin-top:13px">ALLOW LOCATION</button>
+<button id="start" class="primary" style="width:100%;margin-top:13px">START RUN</button>
+<p class="muted">Allow location access when prompted. Keep your phone secure and don't watch the screen while running.</p>
+<div style="font-weight:850;margin-top:14px;margin-bottom:8px">LIVE MAP</div>
+<div id="previewMap" style="height:240px;border-radius:13px;overflow:hidden;background:#dce6df"></div>
+<p class="muted">Map stays visible before and during your run.</p>
 </section>
 <section id="run" class="hidden">
 <div id="dialArea">
-<div class="targetrow"><div style="text-align:left"><div class="caption">TARGET PACE</div><div id="targetText" style="font-weight:900;font-size:19px">10:00 /mi</div></div><div id="badge" class="badge">BELOW TARGET</div></div>
-<div id="dial" class="dial"><div class="dialTop"><span id="dialTargetBox">10:00 /mi</span></div><div id="ticks"></div><div id="hand" class="hand"></div><div class="hub"></div><div class="reading"><div class="label">CURRENT PACE</div><div id="current" class="pace">--:--</div><div id="unitText" class="label">MIN / MILE</div></div></div>
-<div id="status" class="status">WAITING FOR GPS</div><div id="substatus" class="muted">Red means slower than target.</div>
-<div class="stats" style="margin-top:15px;text-align:left"><div class="stat"><div class="caption">DISTANCE</div><div id="distance" class="num">0.00</div><div id="distanceUnit" class="muted">miles</div></div><div class="stat"><div class="caption">AVG PACE</div><div id="average" class="num">--:--</div><div class="muted">min / unit</div></div><div class="stat"><div class="caption">TIME</div><div id="time" class="num">00:00</div><div class="muted">elapsed</div></div></div>
+<div class="targetrow">
+<div style="text-align:left"><div class="caption">TARGET PACE</div><div id="targetText" style="font-weight:900;font-size:19px">10:00 /mi</div></div>
+<div id="badge" class="badge">BELOW TARGET</div>
+</div>
+<div id="dial" class="dial">
+<div class="dialTop"><span id="dialTargetBox">10:00 /mi</span></div>
+<div id="ticks"></div><div id="hand" class="hand"></div><div class="hub"></div>
+<div class="reading"><div class="label">CURRENT PACE</div><div id="current" class="pace">--:--</div><div id="unitText" class="label">MIN / MILE</div></div>
+</div>
+<div id="status" class="status">WAITING FOR GPS</div>
+<div id="substatus" class="muted">Red means slower than target.</div>
+<div class="stats" style="margin-top:15px;text-align:left">
+<div class="stat"><div class="caption">DISTANCE</div><div id="distance" class="num">0.00</div><div id="distanceUnit" class="muted">miles</div></div>
+<div class="stat"><div class="caption">AVG PACE</div><div id="average" class="num">--:--</div><div class="muted">min / unit</div></div>
+<div class="stat"><div class="caption">TIME</div><div id="time" class="num">00:00</div><div class="muted">elapsed</div></div>
+</div>
 <div class="grid" style="margin-top:12px"><button id="pause" class="secondary">Ⅱ PAUSE</button><button id="finish" class="danger">■ FINISH</button></div>
 <button id="dialSize" class="secondary" style="width:100%;margin-top:8px">⛶ EXPAND DIAL</button>
 </div>
 <div class="panel" style="margin-top:12px">
-<div class="maphead"><div><strong style="font-size:18px">LIVE MAP</strong><div class="muted">Your location and direction arrow</div></div><div style="display:flex;gap:6px;align-items:center"><button id="allowLocationRun" class="primary">ALLOW LOCATION</button><button id="mapSize" class="secondary">EXPAND MAP</button></div></div>
-<div id="map"></div><div class="mapbuttons"><button id="recenter" class="secondary">⌖ RECENTER</button><button id="stepsAsk" class="secondary">ENABLE STEP SENSOR</button></div>
+<div class="maphead">
+<div><strong style="font-size:18px">LIVE MAP</strong><div class="muted">Your location and direction arrow</div></div>
+<div style="display:flex;gap:6px;align-items:center"><button id="allowLocationRun" class="primary">ALLOW LOCATION</button><button id="mapSize" class="secondary">EXPAND MAP</button></div>
+</div>
+<div id="map"></div>
+<div class="mapbuttons"><button id="recenter" class="secondary">⌖ RECENTER</button><button id="stepsAsk" class="secondary">ENABLE STEP SENSOR</button></div>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div><strong>Footsteps</strong><div id="stepNote" class="muted">Sensor support depends on your phone/browser.</div></div><div id="steps" class="num">0</div></div>
 </div>
 </section>
-<section id="summary" class="panel hidden"><h2>RUN COMPLETE</h2><div class="stats"><div class="stat"><div class="caption">DISTANCE</div><div id="sDist" class="num">0</div></div><div class="stat"><div class="caption">TIME</div><div id="sTime" class="num">00:00</div></div><div class="stat"><div class="caption">STEPS</div><div id="sSteps" class="num">0</div></div></div><p>Average pace: <strong id="sPace">--:--</strong></p><button id="again" class="primary" style="width:100%">NEW RUN</button></section>
+<section id="summary" class="panel hidden">
+<h2>RUN COMPLETE</h2>
+<div class="stats">
+<div class="stat"><div class="caption">DISTANCE</div><div id="sDist" class="num">0</div></div>
+<div class="stat"><div class="caption">TIME</div><div id="sTime" class="num">00:00</div></div>
+<div class="stat"><div class="caption">STEPS</div><div id="sSteps" class="num">0</div></div>
+</div>
+<p>Average pace: <strong id="sPace">--:--</strong></p>
+<button id="again" class="primary" style="width:100%">NEW RUN</button>
+</section>
 <p class="muted">GPS pace can fluctuate. Step counting uses motion sensors when supported. The live map needs internet and location permission.</p>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -63,30 +134,96 @@ const factor=()=>unit==='mi'?1609.344:1000;
 const fmt=s=>Number.isFinite(s)&&s>=0&&s<3600?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'--:--';
 const clock=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const distNow=()=>dist/factor();
-function initMap(){if(map)return;map=L.map('map',{zoomControl:true}).setView([35.2271,-80.8431],17);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors, and the GIS user community'}).addTo(map);track=L.polyline([],{color:'#1679ed',weight:5}).addTo(map);setTimeout(()=>map.invalidateSize(),100)}
-function setLoc(c){coords=c;let ll=[c.latitude,c.longitude];if(!marker){marker=L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="arrowIcon">▲</div>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map)}else marker.setLatLng(ll);
-let el=marker.getElement();if(el){let arrow=el.querySelector('.arrowIcon');if(arrow&&Number.isFinite(heading))arrow.style.transform='rotate('+heading+'deg)'}
-map.setView(ll,18,{animate:false});points.push(ll);if(points.length>1)track.setLatLngs(points);
+function initMap(){
+ if(map)return;
+ map=L.map('map',{zoomControl:true}).setView([35.2271,-80.8431],17);
+ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors, and the GIS user community'}).addTo(map);
+ track=L.polyline([],{color:'#1679ed',weight:5}).addTo(map);
+ setTimeout(()=>map.invalidateSize(),100);
 }
-function gpsSuccess(p){hideLocationButtons();let c=p.coords;$('gps').textContent='● GPS live';$('gps').style.color='#20df83';if(c.heading!=null&&Number.isFinite(c.heading))heading=c.heading;setLoc(c);if(previewMap){let pll=[c.latitude,c.longitude];if(!previewMarker)previewMarker=L.marker(pll).addTo(previewMap);else previewMarker.setLatLng(pll);previewMap.setView(pll,18,{animate:false});}
-if(last&&!paused){let d=distanceBetween(last.latitude,last.longitude,c.latitude,c.longitude),dt=(p.timestamp-last.ts)/1000;if(d>1.5&&d<100&&dt>0&&dt<20){dist+=d;if(c.speed!=null&&c.speed>.5)pace=factor()/c.speed;else pace=factor()*dt/d}}
-last={latitude:c.latitude,longitude:c.longitude,ts:p.timestamp};draw()}
-function distanceBetween(a,b,c,d){const r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,q=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2;return 6371000*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q))}
-function draw(){let ms=active?(paused?pausedAt:Date.now()-startAt-pausedTotal):elapsed;let sec=ms/1000,d=distNow(),avg=d>0?sec/d:0,good=Number.isFinite(pace)&&pace>0&&pace<=target;
-document.body.classList.toggle('good',good);$('dialArea').classList.toggle('good',good);$('badge').classList.toggle('good',good);$('badge').textContent=good?'ON TARGET':'BELOW TARGET';$('current').textContent=pace?fmt(pace):'--:--';$('unitText').textContent='MIN / '+(unit==='mi'?'MILE':'KM');$('targetText').textContent=fmt(target)+' /'+unit;$('dialTargetBox').textContent=fmt(target)+' /'+unit;$('distance').textContent=d.toFixed(2);$('distanceUnit').textContent=unit==='mi'?'miles':'kilometers';$('average').textContent=fmt(avg);$('time').textContent=clock(sec);$('steps').textContent=steps.toLocaleString();
-$('status').textContent=good?'ON TARGET ✓':(pace?'SLOWER THAN TARGET':'WAITING FOR GPS');$('substatus').textContent=good?'You are meeting or beating your target pace.':'Screen stays red until you reach '+fmt(target)+' per '+(unit==='mi'?'mile.':'kilometer.');
-// Faster = clockwise, slower = counterclockwise. Cap the angle for readability.
-let delta=pace?Math.max(-145,Math.min(145,(target-pace)/target*180)):-145;$('hand').style.transform='rotate('+delta+'deg)';$('dial').style.borderColor=good?'#20df83':'#e53945';
-if(paused)$('status').textContent='PAUSED';
+function setLoc(c){
+ coords=c;let ll=[c.latitude,c.longitude];
+ if(!marker)marker=L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="arrowIcon">▲</div>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map);
+ else marker.setLatLng(ll);
+ let el=marker.getElement();
+ if(el){let arrow=el.querySelector('.arrowIcon');if(arrow&&Number.isFinite(heading))arrow.style.transform='rotate('+heading+'deg')}
+ map.setView(ll,18,{animate:false});points.push(ll);if(points.length>1)track.setLatLngs(points);
 }
-function start(){let m=Number($('mins').value),s=Number($('secs').value);if(!Number.isInteger(m)||m<2||m>30||!Number.isInteger(s)||s<0||s>59){alert('Choose a target pace between 2:00 and 30:59.');return}target=m*60+s;unit=$('units').value;dist=0;steps=0;pace=null;last=null;points=[];elapsed=0;pausedTotal=0;paused=false;active=true;startAt=Date.now();$('setup').classList.add('hidden');$('summary').classList.add('hidden');$('run').classList.remove('hidden');initMap();setTimeout(()=>map.invalidateSize(),150);if(!navigator.geolocation){$('gps').textContent='GPS unavailable';alert('This browser does not support GPS location.');}else watch=navigator.geolocation.watchPosition(gpsSuccess,e=>{$('gps').textContent='● Allow location';$('gps').style.color='#ffd166';},{enableHighAccuracy:true,maximumAge:500,timeout:20000});timer=setInterval(draw,500);draw()}
-function end(){active=false;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;clearInterval(timer);elapsed=Date.now()-startAt-pausedTotal;let d=distNow();$('sDist').textContent=d.toFixed(2)+' '+unit;$('sTime').textContent=clock(elapsed/1000);$('sSteps').textContent=steps;$('sPace').textContent=fmt(d>0?elapsed/1000/d:0)+' /'+unit;$('run').classList.add('hidden');$('summary').classList.remove('hidden')}
-function hideLocationButtons(){['allowLocationSetup','allowLocationRun'].forEach(id=>$(id).classList.add('hidden'));}
-function showLocationButtons(){['allowLocationSetup','allowLocationRun'].forEach(id=>$(id).classList.remove('hidden'));}
+function gpsSuccess(p){
+ const c=p.coords;
+ const accuracy=c.accuracy;
+ $('gps').textContent='● GPS live';
+ $('gps').style.color='#20df83';
+ if(c.heading!=null&&Number.isFinite(c.heading))heading=c.heading;
+
+ // Reject poor fixes for distance calculations.
+ const goodFix=Number.isFinite(accuracy)&&accuracy<=25;
+ if(goodFix){
+   hideLocationButtons();
+   if(map)setLoc(c);
+   if(previewMap){
+     const ll=[c.latitude,c.longitude];
+     if(!previewMarker)previewMarker=L.marker(ll).addTo(previewMap);
+     else previewMarker.setLatLng(ll);
+     previewMap.setView(ll,18,{animate:false});
+   }
+ }else{
+   $('gps').textContent='● GPS accuracy low ('+(Number.isFinite(accuracy)?Math.round(accuracy)+'m':'unknown')+')';
+ }
+ // Accumulate small, plausible movements between accurate fixes.
+ if(goodFix&&last&&!paused){
+   const dt=(p.timestamp-last.ts)/1000;
+   const d=distanceBetween(last.latitude,last.longitude,c.latitude,c.longitude);
+   const speed=Number.isFinite(c.speed)&&c.speed>=0?c.speed:(dt>0?d/dt:Infinity);
+   if(d>=0.5&&d<50&&dt>0&&dt<=20&&speed<=8){
+     dist+=d;
+     if(Number.isFinite(c.speed)&&c.speed>=0.5&&c.speed<=8)pace=factor()/c.speed;
+     else pace=factor()*dt/d;
+   }
+ }
+ if(goodFix)last={latitude:c.latitude,longitude:c.longitude,ts:p.timestamp};
+ draw();
+}
+function distanceBetween(a,b,c,d){
+ const r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,q=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2;
+ return 6371000*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q));
+}
+function draw(){
+ let ms=active?(paused?pausedAt:Date.now()-startAt-pausedTotal):elapsed;
+ let sec=ms/1000,d=distNow(),avg=d>0?sec/d:0,good=Number.isFinite(pace)&&pace>0&&pace<=target;
+ document.body.classList.toggle('good',good);$('dialArea').classList.toggle('good',good);$('badge').classList.toggle('good',good);
+ $('badge').textContent=good?'ON TARGET':'BELOW TARGET';$('current').textContent=pace?fmt(pace):'--:--';
+ $('unitText').textContent='MIN / '+(unit==='mi'?'MILE':'KM');$('targetText').textContent=fmt(target)+' /'+unit;$('dialTargetBox').textContent=fmt(target)+' /'+unit;
+ $('distance').textContent=d.toFixed(2);$('distanceUnit').textContent=unit==='mi'?'miles':'kilometers';$('average').textContent=fmt(avg);$('time').textContent=clock(sec);$('steps').textContent=steps.toLocaleString();
+ $('status').textContent=good?'ON TARGET ✓':(pace?'SLOWER THAN TARGET':'WAITING FOR GPS');
+ $('substatus').textContent=good?'You are meeting or beating your target pace.':'Screen stays red until you reach '+fmt(target)+' per '+(unit==='mi'?'mile.':'kilometer.');
+ let delta=pace?Math.max(-145,Math.min(145,(target-pace)/target*180)):-145;
+ $('hand').style.transform='rotate('+delta+'deg)';$('dial').style.borderColor=good?'#20df83':'#e53945';
+ if(paused)$('status').textContent='PAUSED';
+}
+function start(){
+ let m=Number($('mins').value),s=Number($('secs').value);
+ if(!Number.isInteger(m)||m<2||m>30||!Number.isInteger(s)||s<0||s>59){alert('Choose a target pace between 2:00 and 30:59.');return}
+ target=m*60+s;unit=$('units').value;dist=0;steps=0;pace=null;last=null;points=[];elapsed=0;pausedTotal=0;paused=false;active=true;startAt=Date.now();
+ $('setup').classList.add('hidden');$('summary').classList.add('hidden');$('run').classList.remove('hidden');
+ initMap();setTimeout(()=>map.invalidateSize(),150);
+ if(!navigator.geolocation){$('gps').textContent='GPS unavailable';alert('This browser does not support GPS location.');}
+ else watch=navigator.geolocation.watchPosition(gpsSuccess,e=>{$('gps').textContent=e.code===1?'● Location blocked':'● Waiting for GPS';$('gps').style.color='#ffd166';},{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+ timer=setInterval(draw,250);draw();
+}
+function end(){
+ active=false;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;clearInterval(timer);
+ elapsed=Date.now()-startAt-pausedTotal;let d=distNow();
+ $('sDist').textContent=d.toFixed(2)+' '+unit;$('sTime').textContent=clock(elapsed/1000);$('sSteps').textContent=steps;
+ $('sPace').textContent=fmt(d>0?elapsed/1000/d:0)+' /'+unit;
+ $('run').classList.add('hidden');$('summary').classList.remove('hidden');
+}
+function hideLocationButtons(){['allowLocationSetup','allowLocationRun'].forEach(id=>$(id).classList.add('hidden'))}
+function showLocationButtons(){['allowLocationSetup','allowLocationRun'].forEach(id=>$(id).classList.remove('hidden'))}
 function requestLocationFromButton(){
- if(!navigator.geolocation){$('gps').textContent='● GPS unavailable';alert('This browser does not support location.');return;}
+ if(!navigator.geolocation){$('gps').textContent='● GPS unavailable';alert('This browser does not support location.');return}
  $('gps').textContent='● Requesting location…';
- navigator.geolocation.getCurrentPosition(p=>{gpsSuccess(p);hideLocationButtons();},e=>{
+ navigator.geolocation.getCurrentPosition(p=>{gpsSuccess(p);hideLocationButtons()},e=>{
    $('gps').textContent=e.code===1?'● Location blocked':'● Waiting for GPS';
    if(e.code===1)alert('Location is blocked for this site. Open the site settings in your browser, set Location to Allow, then tap ALLOW LOCATION again.');
    else if(e.code===3)alert('Location is taking too long. Check that Location is turned on for your phone, then try again.');
@@ -94,31 +231,79 @@ function requestLocationFromButton(){
  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
 }
 $('allowLocationSetup').onclick=requestLocationFromButton;$('allowLocationRun').onclick=requestLocationFromButton;
-if(navigator.permissions&&navigator.permissions.query){navigator.permissions.query({name:'geolocation'}).then(p=>{if(p.state==='granted')hideLocationButtons();else showLocationButtons();p.onchange=()=>{if(p.state==='granted')hideLocationButtons();else showLocationButtons();};}).catch(showLocationButtons);}
+if(navigator.permissions&&navigator.permissions.query){
+ navigator.permissions.query({name:'geolocation'}).then(p=>{
+   if(p.state==='granted')hideLocationButtons();else showLocationButtons();
+   p.onchange=()=>{if(p.state==='granted')hideLocationButtons();else showLocationButtons()};
+ }).catch(showLocationButtons);
+}
 $('start').onclick=start;$('finish').onclick=end;
-$('pause').onclick=()=>{if(!active)return;if(!paused){paused=true;pausedAt=Date.now()-startAt-pausedTotal;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;$('pause').textContent='▶ RESUME'}else{pausedTotal+=Date.now()-startAt-pausedAt;startAt=Date.now()-pausedAt;paused=false;last=null;watch=navigator.geolocation.watchPosition(gpsSuccess,()=>{},{enableHighAccuracy:true,maximumAge:500,timeout:20000});$('pause').textContent='Ⅱ PAUSE'}draw()};
+$('pause').onclick=()=>{
+ if(!active)return;
+ if(!paused){
+   paused=true;pausedAt=Date.now()-startAt-pausedTotal;
+   if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;$('pause').textContent='▶ RESUME';
+ }else{
+   pausedTotal+=Date.now()-startAt-pausedAt;startAt=Date.now()-pausedAt;paused=false;last=null;
+   watch=navigator.geolocation.watchPosition(gpsSuccess,()=>{}, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
+   $('pause').textContent='Ⅱ PAUSE';
+ }
+ draw();
+};
 $('again').onclick=()=>{$('summary').classList.add('hidden');$('setup').classList.remove('hidden')};
-$('dialSize').onclick=()=>{expandedDial=!expandedDial;$('dialArea').style.minHeight=expandedDial?'85vh':'';$('dial').style.width=expandedDial?'min(88vw,480px)':'';$('dial').style.height=expandedDial?'min(88vw,480px)':'';$('dialSize').textContent=expandedDial?'↙ SHRINK DIAL':'⛶ EXPAND DIAL'};
-$('mapSize').onclick=()=>{expandedMap=!expandedMap;$('map').classList.toggle('expanded',expandedMap);$('mapSize').textContent=expandedMap?'SHRINK MAP':'EXPAND MAP';if(map)setTimeout(()=>map.invalidateSize(),100)};
+$('dialSize').onclick=()=>{
+ expandedDial=!expandedDial;$('dialArea').style.minHeight=expandedDial?'85vh':'';
+ $('dial').style.width=expandedDial?'min(88vw,480px)':'';$('dial').style.height=expandedDial?'min(88vw,480px)':'';
+ $('dialSize').textContent=expandedDial?'↙ SHRINK DIAL':'⛶ EXPAND DIAL';
+};
+$('mapSize').onclick=()=>{
+ expandedMap=!expandedMap;$('map').classList.toggle('expanded',expandedMap);
+ $('mapSize').textContent=expandedMap?'SHRINK MAP':'EXPAND MAP';if(map)setTimeout(()=>map.invalidateSize(),100);
+};
 $('recenter').onclick=()=>{if(coords)map.setView([coords.latitude,coords.longitude],18);else alert('Waiting for GPS location.')};
-async function enableSteps(){try{if(typeof DeviceMotionEvent==='undefined'){throw new Error('No motion sensor exposed by this device/browser.')}if(typeof DeviceMotionEvent.requestPermission==='function'){let p=await DeviceMotionEvent.requestPermission();if(p!=='granted')throw new Error('Motion permission denied.')}stepSensor=true;$('stepNote').textContent='Motion sensor enabled; step estimate';$('stepsAsk').textContent='STEP SENSOR ENABLED'}catch(e){$('stepNote').textContent=e.message;$('stepsAsk').textContent='SENSOR UNAVAILABLE'}}
+async function enableSteps(){
+ try{
+   if(typeof DeviceMotionEvent==='undefined')throw new Error('No motion sensor exposed by this device/browser.');
+   if(typeof DeviceMotionEvent.requestPermission==='function'){
+     let p=await DeviceMotionEvent.requestPermission();if(p!=='granted')throw new Error('Motion permission denied.');
+   }
+   stepSensor=true;$('stepNote').textContent='Motion sensor enabled; step estimate';$('stepsAsk').textContent='STEP SENSOR ENABLED';
+ }catch(e){$('stepNote').textContent=e.message;$('stepsAsk').textContent='SENSOR UNAVAILABLE'}
+}
 $('stepsAsk').onclick=enableSteps;
-window.addEventListener('devicemotion',e=>{if(!active||paused||!stepSensor)return;let a=e.accelerationIncludingGravity;if(!a)return;let mag=Math.hypot(a.x||0,a.y||0,a.z||0),now=Date.now();if(prevMag&&mag-prevMag>1.7&&now-lastStepAt>280){steps++;lastStepAt=now;$('steps').textContent=steps.toLocaleString()}prevMag=mag});
+window.addEventListener('devicemotion',e=>{
+ if(!active||paused||!stepSensor)return;let a=e.accelerationIncludingGravity;if(!a)return;
+ let mag=Math.hypot(a.x||0,a.y||0,a.z||0),now=Date.now();
+ if(prevMag&&mag-prevMag>1.7&&now-lastStepAt>280){steps++;lastStepAt=now;$('steps').textContent=steps.toLocaleString()}
+ prevMag=mag;
+});
 for(let i=0;i<24;i++){let t=document.createElement('div');t.className='tick';t.style.transform='rotate('+(i*15)+'deg) translateY(0)';$('ticks').appendChild(t)}
-// Ask for location as soon as the app opens. Browser permission prompts are controlled by Chrome.
 function requestLocationOnLaunch(){
- try {
-   if(window.L){previewMap=L.map('previewMap').setView([35.2271,-80.8431],17);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri — Sources: Esri, HERE, Garmin, OpenStreetMap contributors, and the GIS user community'}).addTo(previewMap);}
-   if(!navigator.geolocation){$('gps').textContent='● GPS unavailable';return;}
+ try{
+   if(window.L){
+     previewMap=L.map('previewMap').setView([35.2271,-80.8431],17);
+     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors, and the GIS user community'}).addTo(previewMap);
+   }
+   if(!navigator.geolocation){$('gps').textContent='● GPS unavailable';return}
    $('gps').textContent='● Requesting location…';
    navigator.geolocation.getCurrentPosition(p=>{
-     $('gps').textContent='● GPS ready';$('gps').style.color='#20df83';hideLocationButtons();
-     // Prepare the live map immediately, before the user starts a run.
-     initMap();setLoc(p.coords);map.setView([p.coords.latitude,p.coords.longitude],18);if(previewMap){let ll=[p.coords.latitude,p.coords.longitude];previewMap.setView(ll,18);if(!previewMarker)previewMarker=L.marker(ll).addTo(previewMap);else previewMarker.setLatLng(ll);}setTimeout(()=>{map.invalidateSize();if(previewMap)previewMap.invalidateSize()},100);
-   },e=>{$('gps').textContent=e.code===1?'● Location blocked':'● Waiting for GPS';$('gps').style.color='#ffd166';showLocationButtons();}, {enableHighAccuracy:true,maximumAge:0,timeout:12000});
- } catch(e) {$('gps').textContent='● Location unavailable';}
+     const c=p.coords;$('gps').textContent='● GPS ready';$('gps').style.color='#20df83';
+     if(Number.isFinite(c.accuracy)&&c.accuracy<=25){
+       hideLocationButtons();initMap();setLoc(c);map.setView([c.latitude,c.longitude],18);
+       if(previewMap){
+         let ll=[c.latitude,c.longitude];previewMap.setView(ll,18);
+         if(!previewMarker)previewMarker=L.marker(ll).addTo(previewMap);else previewMarker.setLatLng(ll);
+       }
+       setTimeout(()=>{map.invalidateSize();if(previewMap)previewMap.invalidateSize()},100);
+     }else{$('gps').textContent='● GPS accuracy low ('+Math.round(c.accuracy)+'m)';showLocationButtons()}
+   },e=>{
+     $('gps').textContent=e.code===1?'● Location blocked':'● Waiting for GPS';$('gps').style.color='#ffd166';showLocationButtons();
+   },{enableHighAccuracy:true,maximumAge:0,timeout:12000});
+ }catch(e){$('gps').textContent='● Location unavailable'}
 }
 requestLocationOnLaunch();
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 })();
-</script></body></html>
+</script>
+</body>
+</html>
