@@ -1,19 +1,25 @@
 {
-  "name": "PACEPILOT Running",
-  "short_name": "PACEPILOT",
-  "description": "Live pace dial, GPS map and step estimates",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#b91f2c",
-  "theme_color": "#b91f2c",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+"name": "PACEPILOT Running",
+"short_name": "PACEPILOT",
+"description": "Live pace dial, GPS map and step estimates",
+"start_url": "./index.html",
+"scope": "./",
+"display": "standalone",
+"orientation": "portrait",
+"background_color": "#b91f2c",
+"theme_color": "#b91f2c",
+"icons": [
+{
+"src": "icon.svg",
+"sizes": "any",
+"type": "image/svg+xml",
+"purpose": "any"
+},
+{
+"src": "launchericon-512x512.png",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any maskable"
+}
+]
 }
